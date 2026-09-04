@@ -33,7 +33,7 @@ export function Hero() {
 
             <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start opacity-0-init animate-fade-up animation-delay-300">
               <Button size="lg" className="group" asChild>
-                <a href="#find-parking">
+                <a href="/find-parking">
                   Find Parking
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </a>
