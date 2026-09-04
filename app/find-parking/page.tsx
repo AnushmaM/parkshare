@@ -53,7 +53,30 @@ const parkingSpots: ParkingSpot[] = [
     rating: 4.5,
     accent: 'from-sky-500 to-blue-600',
   },
+  {
+    name: 'Loyola Academy Visitor Parking',
+    area: 'Loyola Academy, Alwal, Hyderabad',
+    distance: '0.4 km away',
+    price: 40,
+    availability: '11 spots left',
+    rating: 4.7,
+    accent: 'from-rose-500 to-red-600',
+  },
 ];
+
+function createGeneratedParkingSpots(destination: string): ParkingSpot[] {
+  const names = ['Metro Parking', 'Central Lot', 'Secure Parking Hub', 'Community Parking'];
+
+  return names.map((suffix, index) => ({
+    name: `${destination} ${suffix}`,
+    area: `${destination} nearby`,
+    distance: `${(0.3 + index * 0.4).toFixed(1)} km away`,
+    price: 30 + Math.floor(Math.random() * 61),
+    availability: `${4 + Math.floor(Math.random() * 21)} spots left`,
+    rating: Number((4.3 + Math.random() * 0.6).toFixed(1)),
+    accent: ['from-violet-500 to-indigo-600', 'from-lime-500 to-green-600', 'from-fuchsia-500 to-pink-600', 'from-slate-500 to-slate-700'][index],
+  }));
+}
 
 export default function FindParkingPage() {
   const [destination, setDestination] = useState('Indiranagar, Bengaluru');
@@ -61,10 +84,25 @@ export default function FindParkingPage() {
   const [startTime, setStartTime] = useState('10:00');
   const [duration, setDuration] = useState('2');
   const [searchedDestination, setSearchedDestination] = useState(destination);
+  const [generatedParkingSpots, setGeneratedParkingSpots] = useState<ParkingSpot[]>([]);
+  const normalizedDestination = destination.trim().toLowerCase();
+  const matchingParkingSpots = normalizedDestination
+    ? parkingSpots.filter((spot) =>
+        `${spot.name} ${spot.area}`.toLowerCase().includes(normalizedDestination)
+      )
+    : parkingSpots;
+  const visibleParkingSpots = matchingParkingSpots.length > 0 ? matchingParkingSpots : generatedParkingSpots;
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSearchedDestination(destination.trim() || 'your destination');
+    const searchedArea = destination.trim() || 'your destination';
+    setSearchedDestination(searchedArea);
+
+    const normalizedSearch = searchedArea.toLowerCase();
+    const exactMatches = parkingSpots.filter((spot) =>
+      `${spot.name} ${spot.area}`.toLowerCase().includes(normalizedSearch)
+    );
+    setGeneratedParkingSpots(exactMatches.length > 0 ? [] : createGeneratedParkingSpots(searchedArea));
   }
 
   return (
@@ -162,13 +200,13 @@ export default function FindParkingPage() {
             <div className="mb-4 flex items-end justify-between gap-4">
               <div>
                 <h2 className="font-headline text-xl font-semibold">Available near {searchedDestination}</h2>
-                <p className="mt-1 text-sm text-muted-foreground">12 spaces found for your search</p>
+                <p className="mt-1 text-sm text-muted-foreground">{visibleParkingSpots.length} spaces found for your search</p>
               </div>
               <button className="hidden text-sm font-medium text-primary hover:underline sm:block">Sort: Recommended</button>
             </div>
 
             <div className="space-y-4">
-              {parkingSpots.map((spot) => (
+              {visibleParkingSpots.map((spot) => (
                 <article key={spot.name} className="overflow-hidden rounded-xl border border-border bg-card shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                   <div className="flex min-h-[154px] flex-col sm:flex-row">
                     <div className={`relative flex h-28 shrink-0 items-end bg-gradient-to-br ${spot.accent} p-4 sm:h-auto sm:w-40`}>
